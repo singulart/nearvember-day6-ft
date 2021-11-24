@@ -3,6 +3,7 @@ import React from 'react'
 import { login, logout, register } from './utils'
 import './global.css'
 import Big from 'big.js';
+import meme1 from './assets/meme1.png';
 
 import getConfig from './config'
 const { networkId } = getConfig(process.env.NODE_ENV || 'development')
@@ -43,23 +44,21 @@ export default function App() {
   if (!window.walletConnection.isSignedIn()) {
     return (
       <main>
-        <h1>Welcome to NEAR!</h1>
+        <h1>Tokenized Homeopathy got <code>TEETH</code>!</h1>
+        <center>
+          <img src = {meme1} width='50%' height='50%'/>
+        </center>
+        <center>
         <p>
-          To make use of the NEAR blockchain, you need to sign in. The button
-          below will sign you in using NEAR Wallet.
+          Introducing <code>TEETH</code> - "Tried Everything Else, Try Homeopathy" Fungible Token
         </p>
         <p>
-          By default, when your app runs in "development" mode, it connects
-          to a test network ("testnet") wallet. This works just like the main
-          network ("mainnet") wallet, but the NEAR Tokens on testnet aren't
-          convertible to other currencies – they're just for testing!
-        </p>
-        <p>
-          Go ahead and click the button below to try it out:
+          Did you know that Starbucks accepts <code>TEETH</code>?
         </p>
         <p style={{ textAlign: 'center', marginTop: '2.5em' }}>
           <button onClick={login}>Sign in</button>
         </p>
+        </center>
       </main>
     )
   }
@@ -74,23 +73,17 @@ export default function App() {
         <h1>
           <label
             htmlFor="greeting"
-            style={{
-              color: 'var(--secondary)',
-              borderBottom: '2px solid var(--secondary)'
-            }}
           >
-            Total balance: {balance}
+            TEETH balance: {balance}
           </label>
-          {' '/* React trims whitespace around tags; insert literal space character when needed */}
-          {window.accountId}!
         </h1>
-        <p>
-          This app requires you to give consent
-        </p>
-        <p style={{ textAlign: 'center', marginTop: '2.5em' }}>
+        <center>
+          You absolutely have to love Homeopathy
+        </center>
+        <p style={{ textAlign: 'center' }}>
           <button onClick={ async () => {
             await window.contract.storage_deposit({ account_id: window.accountId }, '300000000000000', '1250000000000000000000')
-          }}>I Agree</button>
+          }}>I Love Homeopathy</button>
         </p>
         <form onSubmit={async event => {
           event.preventDefault()
@@ -137,20 +130,14 @@ export default function App() {
           <fieldset id="fieldset">
             <label
               htmlFor="mint"
-              style={{
-                display: 'block',
-                color: 'var(--gray)',
-                marginBottom: '0.5em'
-              }}
             >
-              Mint some tokens
+              Grow some TEETH
             </label>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', marginBottom: '2rem'  }}>
               <input
                 autoComplete="off"
-                defaultValue={0}
+                defaultValue={32}
                 id="mint"
-                style={{ flex: 1 }}
               />
               <button
                 style={{ borderRadius: '0 5px 5px 0' }}
@@ -164,26 +151,22 @@ export default function App() {
 
             <label
               htmlFor="transfer"
-              style={{
-                display: 'block',
-                color: 'var(--gray)',
-                marginBottom: '0.5em'
-              }}
             >
-              Transfer some tokens
+              Send TEETH to your buddy
             </label>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', marginBottom: '1rem' }}>
             <input
                 autoComplete="off"
                 defaultValue='grimes.testnet'
                 id="transfer_address"
-                style={{ flex: 1 }}
+                style={{borderRadius: '5px 5px 5px 5px'}}
               />
+            </div>
+            <div style={{ display: 'flex'}}>
               <input
                 autoComplete="off"
                 defaultValue={0}
                 id="transfer_amount"
-                style={{ flex: 1 }}
               />
               <button
                 style={{ borderRadius: '0 5px 5px 0' }}
@@ -191,28 +174,12 @@ export default function App() {
                   await window.contract.ft_transfer({ receiver_id: document.getElementById('transfer_address').value, amount: Math.round(document.getElementById('transfer_amount').value).toString() }, '300000000000000', Big('0.000000000000000000000001').times(10 ** 24).toFixed())
                 }}
               >
-                Transfer
+                Send
               </button>
             </div>
 
           </fieldset>
         </form>
-        <p>
-          Look at that! A Hello World app! This greeting is stored on the NEAR blockchain. Check it out:
-        </p>
-        <ol>
-          <li>
-            Look in <code>src/App.js</code> and <code>src/utils.js</code> – you'll see <code>get_greeting</code> and <code>set_greeting</code> being called on <code>contract</code>. What's this?
-          </li>
-          <li>
-            Ultimately, this <code>contract</code> code is defined in <code>assembly/main.ts</code> – this is the source code for your <a target="_blank" rel="noreferrer" href="https://docs.near.org/docs/develop/contracts/overview">smart contract</a>.</li>
-          <li>
-            When you run <code>yarn dev</code>, the code in <code>assembly/main.ts</code> gets deployed to the NEAR testnet. You can see how this happens by looking in <code>package.json</code> at the <code>scripts</code> section to find the <code>dev</code> command.</li>
-        </ol>
-        <hr />
-        <p>
-          To keep learning, check out <a target="_blank" rel="noreferrer" href="https://docs.near.org">the NEAR docs</a> or look through some <a target="_blank" rel="noreferrer" href="https://examples.near.org">example apps</a>.
-        </p>
       </main>
       {showNotification && <Notification />}
     </>
