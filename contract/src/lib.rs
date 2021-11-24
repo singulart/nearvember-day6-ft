@@ -22,7 +22,7 @@ use near_contract_standards::fungible_token::FungibleToken;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::LazyOption;
 use near_sdk::json_types::{ValidAccountId, U128};
-use near_sdk::{env, log, near_bindgen, AccountId, Balance, PanicOnDefault, PromiseOrValue};
+use near_sdk::{env, log, near_bindgen, AccountId, Balance, PanicOnDefault, Promise, PromiseOrValue};
 
 near_sdk::setup_alloc!();
 
@@ -73,6 +73,46 @@ impl Contract {
         this.token.internal_register_account(owner_id.as_ref());
         this.token.internal_deposit(owner_id.as_ref(), total_supply.into());
         this
+    }
+
+    #[payable]
+    pub fn ft_mint(
+        &mut self,
+        receiver_id: AccountId,
+        amount: U128,
+    ) {
+        //get initial storage usage
+        assert!(
+            amount.0 <= 1000, 
+            "Cannot mint more than 1000 tokens"
+        ); 
+
+        let initial_storage_usage = env::storage_usage();
+
+        let mut amount_for_account = self.token.accounts.get(&receiver_id).unwrap_or(0); 
+        amount_for_account += amount.0; 
+
+        self.token.accounts.insert(&receiver_id, &amount_for_account);
+        self.token.total_supply = self
+            .token    
+            .total_supply
+            .checked_add(amount.0)
+            .unwrap_or_else(|| env::panic(b"Total supply overflow"));
+
+        //refund any excess storage
+        let storage_used = env::storage_usage() - initial_storage_usage;
+        let required_cost = env::storage_byte_cost() * Balance::from(storage_used);
+        let attached_deposit = env::attached_deposit();
+
+        assert!(
+            required_cost <= attached_deposit,
+            "Must attach {} yoctoNEAR to cover storage", required_cost
+        );
+
+        let refund = attached_deposit - required_cost;
+        if refund > 1 {
+            Promise::new(env::predecessor_account_id()).transfer(refund);
+        }
     }
 
     fn on_account_closed(&mut self, account_id: AccountId, balance: Balance) {

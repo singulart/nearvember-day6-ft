@@ -1,6 +1,6 @@
 import 'regenerator-runtime/runtime'
 import React from 'react'
-import { login, logout } from './utils'
+import { login, logout, register } from './utils'
 import './global.css'
 
 import getConfig from './config'
@@ -15,6 +15,8 @@ export default function App() {
 
   // after submitting the form, we want to show Notification
   const [showNotification, setShowNotification] = React.useState(false)
+  const [balance, setBalance] = React.useState(0.0)
+  const [registered, setRegistered] = React.useState(false)
 
   // The useEffect hook can be used to fire side-effects during render
   // Learn more: https://reactjs.org/docs/hooks-intro.html
@@ -22,12 +24,11 @@ export default function App() {
     () => {
       // in this case, we only care to query the contract when signed in
       if (window.walletConnection.isSignedIn()) {
-
-        // window.contract is set by initContract in index.js
-        window.contract.get_greeting({ account_id: window.accountId })
-          .then(greetingFromContract => {
-            set_greeting(greetingFromContract)
-          })
+        window.contract.ft_balance_of({ account_id: window.accountId })
+        .then(balance => {
+          console.log(balance)
+          setBalance(balance)
+        })
       }
     },
 
@@ -77,11 +78,19 @@ export default function App() {
               borderBottom: '2px solid var(--secondary)'
             }}
           >
-            {greeting}
+            Total balance: {balance}
           </label>
           {' '/* React trims whitespace around tags; insert literal space character when needed */}
           {window.accountId}!
         </h1>
+        <p>
+          This app requires you to give consent
+        </p>
+        <p style={{ textAlign: 'center', marginTop: '2.5em' }}>
+          <button onClick={ async () => {
+            await window.contract.storage_deposit({ account_id: window.accountId }, '300000000000000', '1250000000000000000000')
+          }}>I Agree</button>
+        </p>
         <form onSubmit={async event => {
           event.preventDefault()
 
@@ -126,30 +135,56 @@ export default function App() {
         }}>
           <fieldset id="fieldset">
             <label
-              htmlFor="greeting"
+              htmlFor="mint"
               style={{
                 display: 'block',
                 color: 'var(--gray)',
                 marginBottom: '0.5em'
               }}
             >
-              Change greeting
+              Mint some tokens
             </label>
             <div style={{ display: 'flex' }}>
               <input
                 autoComplete="off"
-                defaultValue={greeting}
-                id="greeting"
-                onChange={e => setButtonDisabled(e.target.value === greeting)}
+                defaultValue={0}
+                id="mint"
                 style={{ flex: 1 }}
               />
               <button
-                disabled={buttonDisabled}
                 style={{ borderRadius: '0 5px 5px 0' }}
+                onClick={ async () => {
+                  await window.contract.ft_mint({ receiver_id: window.accountId, amount: Math.round(document.getElementById('mint').value).toString() }, '300000000000000', '1250000000000000000000')
+                }}
               >
-                Save
+                Mint
               </button>
             </div>
+
+            <label
+              htmlFor="transfer"
+              style={{
+                display: 'block',
+                color: 'var(--gray)',
+                marginBottom: '0.5em'
+              }}
+            >
+              Transfer some tokens
+            </label>
+            <div style={{ display: 'flex' }}>
+              <input
+                autoComplete="off"
+                defaultValue={0}
+                id="transfer"
+                style={{ flex: 1 }}
+              />
+              <button
+                style={{ borderRadius: '0 5px 5px 0' }}
+              >
+                Transfer
+              </button>
+            </div>
+
           </fieldset>
         </form>
         <p>
