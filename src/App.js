@@ -2,6 +2,7 @@ import 'regenerator-runtime/runtime'
 import React from 'react'
 import { login, logout, register } from './utils'
 import './global.css'
+import Big from 'big.js';
 
 import getConfig from './config'
 const { networkId } = getConfig(process.env.NODE_ENV || 'development')
@@ -172,14 +173,23 @@ export default function App() {
               Transfer some tokens
             </label>
             <div style={{ display: 'flex' }}>
+            <input
+                autoComplete="off"
+                defaultValue='grimes.testnet'
+                id="transfer_address"
+                style={{ flex: 1 }}
+              />
               <input
                 autoComplete="off"
                 defaultValue={0}
-                id="transfer"
+                id="transfer_amount"
                 style={{ flex: 1 }}
               />
               <button
                 style={{ borderRadius: '0 5px 5px 0' }}
+                onClick={ async () => {
+                  await window.contract.ft_transfer({ receiver_id: document.getElementById('transfer_address').value, amount: Math.round(document.getElementById('transfer_amount').value).toString() }, '300000000000000', Big('0.000000000000000000000001').times(10 ** 24).toFixed())
+                }}
               >
                 Transfer
               </button>
